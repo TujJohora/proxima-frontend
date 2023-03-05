@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import ProjectDetails from "../components/ProjectDetails";
-
+import ProjectForm from "../components/ProjectForm";
 const Home = () => {
   const [projects, setProjects] = useState([]);
+  // eslint-disable-next-line
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const Home = () => {
             ))}
         </div>
       </div>
-      <div className="right"></div>
+      <ProjectForm />
     </div>
   );
 };
