@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useAuthContext } from "../hooks/useAuthContext";
 import { useProjectsContext } from "../hooks/useProjectsContext";
-
 
 const ProjectForm = ({ project, setIsModalOpen, setIsOverlayOpen }) => {
   const [title, setTitle] = useState(project ? project.title : "");
@@ -13,21 +13,30 @@ const ProjectForm = ({ project, setIsModalOpen, setIsOverlayOpen }) => {
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
 const { dispatch } = useProjectsContext();
+const { user } = useAuthContext();
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      setError("You must be logged in!");
+      return;
+    }
     // data
     const projectObj = { title, tech, budget, duration, manager, dev };
 
     // if there is no project, send post req
     if (!project) {
       // post req
-      const res = await fetch("http://localhost:5000/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(projectObj),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/projects`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify(projectObj),
+        }
+      );
       const json = await res.json();
 // !res.ok, set error
 if (!res.ok) {
@@ -54,11 +63,12 @@ return;
 if (project) {
   // send patch req
   const res = await fetch(
-    `http://localhost:5000/api/projects/${project._id}`,
+    `${process.env.REACT_APP_BASE_URL}/api/projects/${project._id}`,
     {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
       },
       body: JSON.stringify(projectObj),
     }
@@ -110,7 +120,7 @@ return (
           placeholder="e.g. e-commerce website"
           id="title"
           className={`bg-transparent border  py-3 px-5 rounded-lg outline-none focus:border-sky-400 duration-300 ${
-            emptyFields.includes("title")
+            emptyFields?.includes("title")
               ? "border-rose-500"
               : "border-slate-500"
           }`}
@@ -131,7 +141,7 @@ return (
           placeholder="e.g. node.js, react, redux etc."
           id="tech"
           className={`bg-transparent border  py-3 px-5 rounded-lg outline-none focus:border-sky-400 duration-300 ${
-            emptyFields.includes("tech")
+            emptyFields?.includes("tech")
               ? "border-rose-500"
               : "border-slate-500"
           }`}
@@ -151,7 +161,7 @@ return (
           placeholder="e.g. 500"
           id="budget"
           className={`bg-transparent border  py-3 px-5 rounded-lg outline-none focus:border-sky-400 duration-300 ${
-            emptyFields.includes("budget")
+            emptyFields?.includes("budget")
               ? "border-rose-500"
               : "border-slate-500"
           }`}
@@ -171,7 +181,7 @@ return (
           placeholder="e.g. e-commerce website"
           id="duration"
           className={`bg-transparent border  py-3 px-5 rounded-lg outline-none focus:border-sky-400 duration-300 ${
-            emptyFields.includes("duration")
+            emptyFields?.includes("duration")
               ? "border-rose-500"
               : "border-slate-500"    }`}
               />
@@ -190,7 +200,7 @@ return (
                 placeholder="e.g. natasha"
                 id="manager"
                 className={`bg-transparent border  py-3 px-5 rounded-lg outline-none focus:border-sky-400 duration-300 ${
-                  emptyFields.includes("manager")
+                  emptyFields?.includes("manager")
                     ? "border-rose-500": "border-slate-500"
                   }`}
                 />
@@ -209,7 +219,9 @@ return (
                   placeholder="e.g. 5"
                   id="dev"
                   className={`bg-transparent border  py-3 px-5 rounded-lg outline-none focus:border-sky-400 duration-300 ${
-                    emptyFields.includes("dev") ? "border-rose-500" : "border-slate-500"  }`}
+                    emptyFields?.includes("dev")
+                    ? "border-rose-500"
+                    : "border-slate-500"  }`}
                     />
                   </div>
                   <button
